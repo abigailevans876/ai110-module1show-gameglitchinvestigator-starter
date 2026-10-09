@@ -4,73 +4,17 @@
 
 ---
 
-## Agent Workflow (SF8)
-
-> Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
-
-**What task did you give the agent?**
-
-<!-- Describe the goal you asked the agent to accomplish -->
-
-**What did the agent do?**
-
-<!-- List the steps the agent took (files edited, commands run, etc.) -->
-
-**What did you have to verify or fix manually?**
-
-<!-- Describe anything the agent got wrong or that required human review -->
-
----
-
 ## Test Generation (SF7)
 
 > Document how you used AI to help generate or improve tests.
 
+Tool: Claude (Claude Code in VS Code).
+
+Prompts used: "guide me in making all the necessary changes", followed by "can you add these changes?", after sharing the grading rubric. Claude suggested `parse_guess` edge-case tests and then added them to `tests/test_game_logic.py`.
+
 | Edge Case | Prompt Used | AI-Suggested Test | Did It Pass? | Your Reasoning |
 |-----------|-------------|-------------------|--------------|----------------|
-| | | | | |
-| | | | | |
-| | | | | |
-
----
-
-## Linting & Style (SF9)
-
-> Document your use of AI for linting or code style improvements.
-
-**Prompt used:**
-
-```
-<!-- Paste the prompt you gave the AI -->
-```
-
-**Linting output before:**
-
-```
-<!-- Paste relevant linter warnings/errors -->
-```
-
-**Changes applied:**
-
-<!-- Describe what you changed based on the AI's suggestions -->
-
----
-
-## Model Comparison (SF11)
-
-> Compare two AI models on the same task.
-
-**Task given to both models:**
-
-<!-- Describe what you asked each model to do -->
-
-| | Model A | Model B |
-|-|---------|---------|
-| **Model name** | | |
-| **Response summary** | | |
-| **More Pythonic?** | | |
-| **Clearer explanation?** | | |
-
-**Which did you prefer and why?**
-
-<!-- Your conclusion -->
+| Empty input | "guide me in making all the necessary changes" | `test_empty_input`: `parse_guess("")` returns `ok=False` and "Enter a guess." | Yes | Players can click Submit without typing anything. That should show a message, not count as a guess or crash. |
+| Non-numeric text | same | `test_non_numeric_input`: `parse_guess("abc")` returns `ok=False` and "That is not a number." | Yes | `int("abc")` raises an error. This checks that the `try/except` catches it and shows a friendly message. |
+| Negative number | same | `test_negative_number`: `parse_guess("-5")` returns `ok=True, value=-5` | Yes | Checks that the minus sign is parsed correctly. It also documents that the game accepts guesses outside the range instead of rejecting them. |
+| Decimal | same | `test_decimal_is_truncated`: `parse_guess("3.7")` returns `ok=True, value=3` | Yes | The `"." in raw` branch is a separate code path. This confirms that decimals are cut down to a whole number rather than rounded. |

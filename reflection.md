@@ -14,10 +14,30 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 Document at least 3 bugs you found. Add rows as needed.
 
-| Input | Expected Behavior | Actual Behavior | Console Output / Error |
-| Attempts| Attempts should be 8 |Attempts was 7 | none|
-|New Game |Attempts reset to 8 | Attempts did not reset to 8| none |
-|Hint |The hint should accurately tell the user if they need to go lower/higher to get secret number | The hint was inaccurate in telling users whether to go lower/higher to get secret number| Telling user to go lower when they need to go higher or vice versa|
+| Input | Expected Behavior | Actual Behavior | Console Output / Error | Cause in Code |
+|-------|-------------------|-----------------|------------------------|---------------|
+| Start a new game on Normal | "Attempts left: 8" to match the sidebar | "Attempts left: 7" | none | `st.session_state.attempts` started at `1` instead of `0` |
+| Guess 63 when the secret is 53 | "📉 Go LOWER!" | "📈 Go HIGHER!" | none | The messages in `check_guess` were swapped |
+| Guess 9 twice when the secret is 50 | "📈 Go HIGHER!" both times | Attempt 1: "Go HIGHER!", attempt 2: "Go LOWER!" | none | On even attempts the secret was turned into a string, so `"9" > "50"` was compared as text |
+| Keep guessing after winning | "You already won. Start a new game to play again." | The game kept accepting guesses (attempt 4: "Go HIGHER!") | none | `st.session_state.status = "playing"` ran on every rerun, and the New Game handler was missing |
+
+**Game trace (starter code, before fixes)**
+
+```
+Secret: 53 | Guess a number between 1 and 100. Attempts left: 7
+attempts=2: guessed 63 -> ['📈 Go HIGHER!']          <- wrong, 63 is too high
+attempts=3: guessed 53 -> ['🎉 Correct!', 'You won! The secret was 53. Final score: 65']
+```
+
+**Game trace (after the hint fix, before the remaining fixes)**
+
+```
+Secret set to 50
+attempts=1: guessed 9 -> ['📈 Go HIGHER!']           status=playing
+attempts=2: guessed 9 -> ['📉 Go LOWER!']            status=playing   <- same guess, opposite hint
+attempts=3: guessed 50 -> ['🎉 Correct!', 'You won! The secret was 50. Final score: 60'] status=won
+attempts=4: guessed 20 -> ['📈 Go HIGHER!']          status=playing   <- game kept going after the win
+```
 
 ---
 
@@ -38,11 +58,16 @@ I used Claude. One example of an AI suggestion that was correct was to fix the n
 - Did AI help you design or understand any tests? How?
 
 I decided if a bug was fixed by manually refeshing the game and testing it to see if the bug persists. I did not use AI to design or understand any tests 
+
+<!-- TODO: this is no longer accurate. Claude wrote the edge-case tests in tests/test_game_logic.py,
+and `python -m pytest -v` now shows 7 passed. Describe one test and what it showed you. -->
 ---
 
 ## 4. What did you learn about Streamlit and state?
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+
+<!-- TODO: 3-5 sentences in your own words. -->
 
 ---
 
